@@ -3,6 +3,8 @@ import datetime
 import os
 import sys
 
+# EXTRA: COLORED TERMINAL / IGNORE FOR EVALUATION
+
 
 def red(s: str): print("\x1b[31;1m", s, "\x1b[0m")
 def green(s: str): print("\x1b[32;1m", s, "\x1b[0m")
@@ -10,11 +12,14 @@ def blue(s: str): print("\x1b[33;1m", s, "\x1b[0m")
 def yellow(s: str): print("\x1b[36;1m", s, "\x1b[0m")
 
 
+# Check CLI args
 argc = len(sys.argv)
+# If testcase file name is missing exit
 if(argc < 2):
     red("No TestCase file Provided!")
     exit()
 
+# get testcase file name and create a name for temporary database file (time dependent)
 testCaseFile = sys.argv[1]
 dbFile = "DB_"+str(datetime.datetime.now()).replace(" ", "_") + ".sqlite3"
 
@@ -22,9 +27,16 @@ testCase = open(testCaseFile)
 
 parking = None
 
+# run query for given testcase
 for t in testCase:
+
+    
+    #split query line into tokens
     tokens = t.split()
-    #print(tokens)
+    # print(tokens)
+
+    # each if condition handles a type of query
+
     if(tokens[0] == "Create_parking_lot"):
         parking = parkingLot.Parking(int(tokens[1]), dbFile)
         blue("Created parking of "+str(tokens[1])+" slots")
@@ -36,35 +48,45 @@ for t in testCase:
         if sNumber == -1:
             red("Parking Full")
         else:
-            green(str("Car with vehicle registration number" +
+            green(str("Car with vehicle registration number " +
                       str(rNumber)+" has been parked at slot number: "+str(sNumber)))
 
     if(tokens[0] == "Slot_numbers_for_driver_of_age"):
         dAge = int(tokens[1])
         result = parking.getSlots_withDAge(dAge)
-        if result == []:red("null")
-        else:blue(str(result))
+        if result == []:
+            red("null")
+        else:
+            blue(str(result))
 
     if(tokens[0] == "Slot_number_for_car_with_number"):
         rNumber = tokens[1]
         result = parking.getSlot_withRNumber(rNumber)
-        if result == -1:red("No car found")
-        else:blue(result)
+        if result == -1:
+            red("No car found")
+        else:
+            blue(result)
 
     if(tokens[0] == "Leave"):
         sNumber = tokens[1]
         result = parking.depart(sNumber)
-        if result == []:red(str("No car was parked at "+sNumber))
+        if result == []:
+            red(str("No car was parked at "+sNumber))
         else:
-            yellow(str("Slot number "+sNumber+" vacated, the car with vehicle registration number "+result[1]+" left the space, the driver of the car was of age "+str(result[2])))
+            yellow(str("Slot number "+sNumber+" vacated, the car with vehicle registration number " +
+                       result[1]+" left the space, the driver of the car was of age "+str(result[2])))
 
     if(tokens[0] == "Vehicle_registration_number_for_driver_of_age"):
         dAge = tokens[1]
         result = parking.getRNumber_withDAge(dAge)
-        if result == []:red("null")
+        if result == []:
+            red("null")
         else:
             blue(str(result))
 
+
+# close testcase file and delete temporary db file.
 testCase.close()
 
-if os.path.exists(dbFile):os.remove(dbFile)
+if os.path.exists(dbFile):
+    os.remove(dbFile)
